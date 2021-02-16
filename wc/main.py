@@ -23,8 +23,10 @@ def crawler(stock,columns_list):
         soup = BeautifulSoup(datas.content, 'lxml')
         #get data for each column
         for column in columns_list:
-            raw = soup.find(column[1], {'class': column[2]})
+            raw = soup.find(column[2], {'class': column[3]})
             data = re.findall(re.compile(r'>([\s\S]+?)<'), str(raw))[0]
+            if column[1]== 'num':
+                data = float(data.replace(',',''))
             data_dict[column[0]]=data
     except Exception as e:
         print(f"Crawling {stock} failed.",e)
@@ -53,7 +55,7 @@ def insert_stock(stock,data_dict,mycursor):
             keys += data[0]+", "
             vals += f"'{data[1]}', "
 
-        sql = f"INSERT INTO newtable (Stock, {keys}Datetime) VALUES ('{stock}', {vals}CURRENT_TIME)"
+        sql = f"INSERT INTO newtable (Stock, {keys}Updated) VALUES ('{stock}', {vals}CURRENT_TIME)"
         mycursor.execute(sql)
     except Exception as e:
         print(f"Inserting {stock} failed.",e)
